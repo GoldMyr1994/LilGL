@@ -3,8 +3,11 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from PIL import Image
 from math import sin, cos, degrees, radians, sqrt, pow, atan2
-
 import math
+
+print(GL_VERSION)
+print(GL_MINOR_VERSION)
+print(GL_MAJOR_VERSION)
 
 width = 640
 height = 480
@@ -158,6 +161,19 @@ def load_texture_x(file_name):
     return load_texture(file_name, channels="RGBA")
 
 
+def print_light_info(light_name):
+    print(light_name.__repr__().split(" ")[0])
+    print("\t->", GL_AMBIENT.__repr__().split(" ")[0], glGetLightfv(GL_LIGHT0, GL_AMBIENT))
+    print("\t->", GL_DIFFUSE.__repr__().split(" ")[0], glGetLightfv(light_name, GL_DIFFUSE))
+    print("\t->", GL_SPECULAR.__repr__().split(" ")[0], glGetLightfv(light_name, GL_SPECULAR))
+    print("\t->", GL_POSITION.__repr__().split(" ")[0], glGetLightfv(light_name, GL_POSITION))
+    print("\t->", GL_SPOT_DIRECTION.__repr__().split(" ")[0], glGetLightfv(light_name, GL_SPOT_DIRECTION))
+    print("\t->", GL_SPOT_EXPONENT.__repr__().split(" ")[0], glGetLightfv(light_name, GL_SPOT_EXPONENT))
+    print("\t->", GL_CONSTANT_ATTENUATION.__repr__().split(" ")[0], glGetLightfv(light_name, GL_CONSTANT_ATTENUATION))
+    print("\t->", GL_LINEAR_ATTENUATION.__repr__().split(" ")[0], glGetLightfv(light_name, GL_LINEAR_ATTENUATION))
+    print("\t->", GL_QUADRATIC_ATTENUATION.__repr__().split(" ")[0], glGetLightfv(light_name, GL_QUADRATIC_ATTENUATION))
+
+
 def init():
 
     global primary, secondary, sun
@@ -175,7 +191,9 @@ def init():
     glEnable(GL_LIGHT2)            # Enable light #2
 
     glLightfv(GL_LIGHT0, GL_POSITION, sun_pos)
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, sun_light)
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 0.2])
+
+    print_light_info(GL_LIGHT0)
 
     glEnable(GL_NORMALIZE)
 
@@ -234,34 +252,42 @@ def draw_axis_3d():
     glTranslatef(eye_x, eye_y, eye_z)
     glTranslatef(2.5, -2, 0)
 
-    # glPushMatrix()
-    # glTranslatef(0., 0., -5.)
-    # glRotatef(90, 0., 1., 0.)
-    # glMaterialfv(GL_FRONT, GL_DIFFUSE, [1., 0., 0.])
-    # glScalef(0.5, 0.5, 0.5)
-    # gluCylinder(arrow_x_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
-    # glTranslatef(0., 0., 0.3)
-    # glutSolidCone(0.2, 0.5, 32, 32)
-    # glPopMatrix()
+    glDisable(GL_LIGHTING)
+    # three arrows are colored using glColor
+    # to do this light mus be disabled
+    # in this way arrows have theirs own color
+    # and doesn't have any effects on the rest of the scene
 
-    # glPushMatrix()
-    # glTranslatef(0., 0., -5.)
-    # glRotatef(-90, 1., 0., 0.)
-    # glMaterialfv(GL_FRONT, GL_DIFFUSE, [0., 1., 0.])
-    # glScalef(0.5, 0.5, 0.5)
-    # gluCylinder(arrow_y_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
-    # glTranslatef(0., 0., 0.3)
-    # glutSolidCone(0.2, 0.5, 32, 32)
-    # glPopMatrix()
+    glPushMatrix()
+    glTranslatef(0., 0., -5.)
+    glRotatef(90, 0., 1., 0.)
+    glColor3f(1., 0., 0.)
+    glScalef(0.5, 0.5, 0.5)
+    gluCylinder(arrow_x_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
+    glTranslatef(0., 0., 0.3)
+    glutSolidCone(0.2, 0.5, 32, 32)
+    glPopMatrix()
 
-    # glPushMatrix()
-    # glTranslatef(0., 0., -5.)
-    # glMaterialfv(GL_FRONT, GL_DIFFUSE, [0., 0., 1.])
-    # glScalef(0.5, 0.5, 0.5)
-    # gluCylinder(arrow_z_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
-    # glTranslatef(0., 0., 0.3)
-    # glutSolidCone(0.2, 0.5, 32, 32)
-    # glPopMatrix()
+    glPushMatrix()
+    glTranslatef(0., 0., -5.)
+    glRotatef(-90, 1., 0., 0.)
+    glColor3f(0., 1., 0.)
+    glScalef(0.5, 0.5, 0.5)
+    gluCylinder(arrow_y_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
+    glTranslatef(0., 0., 0.3)
+    glutSolidCone(0.2, 0.5, 32, 32)
+    glPopMatrix()
+
+    glPushMatrix()
+    glTranslatef(0., 0., -5.)
+    glColor3f(0., 0., 1.)
+    glScalef(0.5, 0.5, 0.5)
+    gluCylinder(arrow_z_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
+    glTranslatef(0., 0., 0.3)
+    glutSolidCone(0.2, 0.5, 32, 32)
+    glPopMatrix()
+
+    glEnable(GL_LIGHTING)
 
     glPopMatrix()
 
@@ -296,7 +322,23 @@ def draw_tree():
     glPopMatrix()
 
 
+def draw_two_plate_tree():
+    glPushMatrix()
+    glRotatef(100, 0., 1., 0.)
+    glRotatef(60, 1., 0., 0.)
+    glTranslatef(0., 0., -2.9)
+    draw_tree()
+    glRotatef(90, 0., 0., 1.)
+    draw_tree()
+    glPopMatrix()
+
+
 def draw_rose():
+
+    glPushMatrix()
+    glRotatef(-100, 0., 1., 0.)
+    glRotatef(-60, 1., 0., 0.)
+    glTranslatef(0., 0., -2.9)
 
     glPushMatrix()
     glScale(0.75, 0.75, 0.75)
@@ -325,8 +367,15 @@ def draw_rose():
 
     glPopMatrix()
 
+    glPopMatrix()
 
-def draw_lp():
+
+def draw_little_prince_and_fox():
+
+    glPushMatrix()
+    glRotatef(-70, 0., 1., 0.)
+    glRotatef(-30, 1., 0., 0.)
+    glTranslatef(0., 0., -2.9)
 
     glPushMatrix()
     glScale(0.75, 0.75, 0.75)
@@ -352,6 +401,8 @@ def draw_lp():
 
     glDisable(GL_ALPHA_TEST)
     glDisable(GL_BLEND)
+
+    glPopMatrix()
 
     glPopMatrix()
 
@@ -387,15 +438,14 @@ def display():
 
     draw_background()
 
-    glPushMatrix()
-    glTranslatef(*sun_pos)
-    glRotatef(90., 1., 0., 0.)
-    glEnable(GL_TEXTURE_2D)
-    glBindTexture(GL_TEXTURE_2D, tex_sun)
-
-    gluSphere(sun, 3, 32, 32)
-    glDisable(GL_TEXTURE_2D)
-    glPopMatrix()
+    # glPushMatrix()
+    # glTranslatef(*sun_pos)
+    # glRotatef(90., 1., 0., 0.)
+    # glEnable(GL_TEXTURE_2D)
+    # glBindTexture(GL_TEXTURE_2D, tex_sun)
+    # gluSphere(sun, 3, 32, 32)
+    # glDisable(GL_TEXTURE_2D)
+    # glPopMatrix()
 
     glPushMatrix()
 
@@ -414,28 +464,11 @@ def display():
     gluSphere(primary, 3, 32, 32)
     glDisable(GL_TEXTURE_2D)
 
-    glPushMatrix()
-    glRotatef(100, 0., 1., 0.)
-    glRotatef(60, 1., 0., 0.)
-    glTranslatef(0., 0., -2.9)
-    draw_tree()
-    glRotatef(90, 0., 0., 1.)
-    draw_tree()
-    glPopMatrix()
+    draw_two_plate_tree()
 
-    glPushMatrix()
-    glRotatef(-100, 0., 1., 0.)
-    glRotatef(-60, 1., 0., 0.)
-    glTranslatef(0., 0., -2.9)
     draw_rose()
-    glPopMatrix()
 
-    glPushMatrix()
-    glRotatef(-70, 0., 1., 0.)
-    glRotatef(-30, 1., 0., 0.)
-    glTranslatef(0., 0., -2.9)
-    draw_lp()
-    glPopMatrix()
+    draw_little_prince_and_fox()
 
     glPopMatrix()
 
@@ -446,7 +479,6 @@ def display():
     glRotatef(90., 1., 0., 0.)
     glRotatef(secondary_rot_angle, 0.0, 0., 1.0)
     glEnable(GL_TEXTURE_2D)
-
     glBindTexture(GL_TEXTURE_2D, tex_secondary_planet)
     gluSphere(secondary, 1, 32, 32)
     glDisable(GL_TEXTURE_2D)
@@ -471,15 +503,19 @@ def keyboard(key, x, y):
         sys.exit()
     if key == b'w':
         move_forward()
+        glutPostRedisplay()
         return
     if key == b's':
         move_backwards()
+        glutPostRedisplay()
         return
     if key == b'a':
         move_left()
+        glutPostRedisplay()
         return
     if key == b'd':
         move_right()
+        glutPostRedisplay()
         return
     if key == b'0':
         eye_x = 0.
@@ -488,46 +524,48 @@ def keyboard(key, x, y):
         eye_rho = 10.
         eye_phi = 180.
         eye_theta = 90.
+        glutPostRedisplay()
         return
     if key == b'9':
-        print("key 9: sun view")
         sun_rho, sun_phi, sun_theta = cart2sphe(sun_pos[0], sun_pos[1], sun_pos[2])
         eye_rho = 10.
         eye_phi = -sun_theta
         eye_theta = sun_phi-90
+        glutPostRedisplay()
         return
     if key == b'x':
-        print("key x: toggle 3D axis")
         show_axis = not show_axis
+        glutPostRedisplay()
         return
     if key == b'b':
-        print("key b: toggle rotation")
         block_rotation = not block_rotation
+        glutPostRedisplay()
         return
 
 
 def special_keyboard(key, x, y):
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
+
     if key == GLUT_KEY_LEFT:
         eye_phi += 1
-        print("key left:")
+        glutPostRedisplay()
         return
     if key == GLUT_KEY_RIGHT:
-        print("key right:")
         eye_phi -= 1
+        glutPostRedisplay()
         return
     if key == GLUT_KEY_DOWN:
-        print("key down")
         if eye_theta == 135:
             return
         eye_theta += 1
+        glutPostRedisplay()
         return
     if key == GLUT_KEY_UP:
-        print("key up:")
         if eye_theta == 45:
             return
         eye_theta -= 1
+        glutPostRedisplay()
         return
 
 
