@@ -170,12 +170,12 @@ def init():
     glEnable(GL_DEPTH_TEST)
 
     glEnable(GL_LIGHTING)
-    # glEnable(GL_LIGHT0)            # Enable light #1
-    # glEnable(GL_LIGHT1)            # Enable light #1
-    # glEnable(GL_LIGHT2)            # Enable light #2
+    glEnable(GL_LIGHT0)            # Enable light #1
+    glEnable(GL_LIGHT1)            # Enable light #1
+    glEnable(GL_LIGHT2)            # Enable light #2
 
-    # glLightfv(GL_LIGHT0, GL_POSITION, light_pos)
-    # glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light_ambient)
+    glLightfv(GL_LIGHT0, GL_POSITION, sun_pos)
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, sun_light)
 
     glEnable(GL_NORMALIZE)
 
@@ -223,9 +223,6 @@ def init():
     gluQuadricDrawStyle(sky_dome, GLU_FILL)
     gluQuadricOrientation(sky_dome, GLU_INSIDE)
 
-    # magimagia
-    # glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
-    # glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL)
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
 
 
@@ -233,14 +230,8 @@ def draw_axis_3d():
 
     global arrow_x_q, arrow_y_q, arrow_z_q
 
-    # x_color = [1, 0, 0]     # X rosso
-    # y_color = [0, 1, 0]     # Y verde
-    # z_color = [0, 0, 1]     # Z blu
-
     glPushMatrix()
     glTranslatef(eye_x, eye_y, eye_z)
-    # x, y, z = sphe2cart(4, eye_phi-90, eye_theta+45)
-    # glTranslatef(y, z, x)
     glTranslatef(2.5, -2, 0)
 
     # glPushMatrix()
@@ -401,7 +392,7 @@ def display():
     glRotatef(90., 1., 0., 0.)
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, tex_sun)
-    glMaterialfv(GL_FRONT, GL_AMBIENT, sun_light)
+
     gluSphere(sun, 3, 32, 32)
     glDisable(GL_TEXTURE_2D)
     glPopMatrix()
@@ -420,11 +411,6 @@ def display():
     glRotatef(primary_rot_angle, 0.0, 0., 1.0)
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, tex_primary_planet)
-    # glMaterialfv(GL_FRONT, GL_AMBIENT, (0.1, 0.1, 0.1, 1.0))
-    # glMaterialfv(GL_FRONT, GL_DIFFUSE, (1, 1, 1, 1))
-    # glMaterialfv(GL_FRONT, GL_SPECULAR, (0.2, 0.2, 0.2, 1))
-    # glMaterialfv(GL_FRONT, GL_EMISSION, (0, 0, 0, 1))
-    # glMaterialf(GL_FRONT, GL_SHININESS, 10)
     gluSphere(primary, 3, 32, 32)
     glDisable(GL_TEXTURE_2D)
 
@@ -460,12 +446,8 @@ def display():
     glRotatef(90., 1., 0., 0.)
     glRotatef(secondary_rot_angle, 0.0, 0., 1.0)
     glEnable(GL_TEXTURE_2D)
+
     glBindTexture(GL_TEXTURE_2D, tex_secondary_planet)
-    # glMaterialfv(GL_FRONT, GL_AMBIENT, (0.1, 0.1, 0.1, 1.0))
-    # glMaterialfv(GL_FRONT, GL_DIFFUSE, (1, 1, 1, 1))
-    # glMaterialfv(GL_FRONT, GL_SPECULAR, (0.2, 0.2, 0.2, 1))
-    # glMaterialfv(GL_FRONT, GL_EMISSION, (0, 0, 0, 1))
-    # glMaterialf(GL_FRONT, GL_SHININESS, 10)
     gluSphere(secondary, 1, 32, 32)
     glDisable(GL_TEXTURE_2D)
 
