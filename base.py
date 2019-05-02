@@ -2,7 +2,8 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from PIL import Image
-from math import sin, cos, radians, sqrt, pow, atan2
+from math import sin, cos, degrees, radians, sqrt, pow, atan2
+
 import math
 
 width = 640
@@ -17,7 +18,7 @@ secondary_rev_angle = 90
 
 sun = None
 sun_pos = [-50.0, 0.0, +50.0]
-sun_light = [1., 1, 1.]
+sun_light = [1., 1., 1.]
 
 sky_dome = None
 
@@ -56,16 +57,13 @@ eye_phi = 180.
 eye_theta = 90.
 
 
-def print_eye_info():
-    print("Eye x, y, z: {}, {}, {}".format(eye_x, eye_y, eye_z))
-
-
 def cart2sphe(x, y, z):
     rho_xy = sqrt(pow(x, 2)+pow(y, 2))
-    rho = sqrt(rho_xy+pow(z, 2))
+    rho = sqrt(pow(rho_xy, 2)+pow(z, 2))
     theta = atan2(z, rho_xy)
+    print(x,y)
     phi = atan2(y, x)
-    return rho, phi, theta
+    return rho, degrees(phi), degrees(theta)
 
 
 def sphe2cart(rho, phi, theta):
@@ -75,6 +73,42 @@ def sphe2cart(rho, phi, theta):
     return x, y, z
 
 
+def move_forward():
+    global eye_x, eye_y, eye_z
+    global eye_rho, eye_phi, eye_theta
+    dx, dy, dz = sphe2cart(1., eye_phi, eye_theta)
+    eye_x += dy
+    eye_y += dz
+    eye_z += dx
+
+
+def move_backwards():
+    global eye_x, eye_y, eye_z
+    global eye_rho, eye_phi, eye_theta
+    dx, dy, dz = sphe2cart(1., eye_phi, eye_theta)
+    eye_x -= dy
+    eye_y -= dz
+    eye_z -= dx
+
+
+def move_left():
+    global eye_x, eye_y, eye_z
+    global eye_rho, eye_phi, eye_theta
+    dx, dy, dz, = sphe2cart(1., eye_phi+90, eye_theta)
+    eye_x += dy
+    eye_y += dz
+    eye_z += dx
+
+
+def move_right():
+    global eye_x, eye_y, eye_z
+    global eye_rho, eye_phi, eye_theta
+    dx, dy, dz, = sphe2cart(1., eye_phi+90, eye_theta)
+    eye_x -= dy
+    eye_y -= dz
+    eye_z -= dx
+
+
 def get_look_at_args():
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
@@ -82,8 +116,7 @@ def get_look_at_args():
     target_x = eye_x + y
     target_y = eye_y + z
     target_z = eye_z + x
-
-    up_x, up_y, up_z = sphe2cart(1,eye_phi,eye_theta-90)
+    # up_x, up_y, up_z = sphe2cart(1,eye_phi,eye_theta-90)
     up_x = 0.
     up_y = 1.
     up_z = 0.
@@ -137,9 +170,9 @@ def init():
     glEnable(GL_DEPTH_TEST)
 
     glEnable(GL_LIGHTING)
-    glEnable(GL_LIGHT0)            # Enable light #1
-    glEnable(GL_LIGHT1)            # Enable light #1
-    glEnable(GL_LIGHT2)            # Enable light #2
+    # glEnable(GL_LIGHT0)            # Enable light #1
+    # glEnable(GL_LIGHT1)            # Enable light #1
+    # glEnable(GL_LIGHT2)            # Enable light #2
 
     # glLightfv(GL_LIGHT0, GL_POSITION, light_pos)
     # glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light_ambient)
@@ -200,9 +233,9 @@ def draw_axis_3d():
 
     global arrow_x_q, arrow_y_q, arrow_z_q
 
-    x_color = [1, 0, 0]     # X rosso
-    y_color = [0, 1, 0]     # Y verde
-    z_color = [0, 0, 1]     # Z blu
+    # x_color = [1, 0, 0]     # X rosso
+    # y_color = [0, 1, 0]     # Y verde
+    # z_color = [0, 0, 1]     # Z blu
 
     glPushMatrix()
     glTranslatef(eye_x, eye_y, eye_z)
@@ -210,34 +243,34 @@ def draw_axis_3d():
     # glTranslatef(y, z, x)
     glTranslatef(2.5, -2, 0)
 
-    glPushMatrix()
-    glTranslatef(0., 0., -5.)
-    glRotatef(90, 0., 1., 0.)
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, x_color)
-    glScalef(0.5, 0.5, 0.5)
-    gluCylinder(arrow_x_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
-    glTranslatef(0., 0., 0.3)
-    glutSolidCone(0.2, 0.5, 32, 32)
-    glPopMatrix()
+    # glPushMatrix()
+    # glTranslatef(0., 0., -5.)
+    # glRotatef(90, 0., 1., 0.)
+    # glMaterialfv(GL_FRONT, GL_DIFFUSE, [1., 0., 0.])
+    # glScalef(0.5, 0.5, 0.5)
+    # gluCylinder(arrow_x_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
+    # glTranslatef(0., 0., 0.3)
+    # glutSolidCone(0.2, 0.5, 32, 32)
+    # glPopMatrix()
 
-    glPushMatrix()
-    glTranslatef(0., 0., -5.)
-    glRotatef(-90, 1., 0., 0.)
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, y_color)
-    glScalef(0.5, 0.5, 0.5)
-    gluCylinder(arrow_y_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
-    glTranslatef(0., 0., 0.3)
-    glutSolidCone(0.2, 0.5, 32, 32)
-    glPopMatrix()
+    # glPushMatrix()
+    # glTranslatef(0., 0., -5.)
+    # glRotatef(-90, 1., 0., 0.)
+    # glMaterialfv(GL_FRONT, GL_DIFFUSE, [0., 1., 0.])
+    # glScalef(0.5, 0.5, 0.5)
+    # gluCylinder(arrow_y_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
+    # glTranslatef(0., 0., 0.3)
+    # glutSolidCone(0.2, 0.5, 32, 32)
+    # glPopMatrix()
 
-    glPushMatrix()
-    glTranslatef(0., 0., -5.)
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, z_color)
-    glScalef(0.5, 0.5, 0.5)
-    gluCylinder(arrow_z_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
-    glTranslatef(0., 0., 0.3)
-    glutSolidCone(0.2, 0.5, 32, 32)
-    glPopMatrix()
+    # glPushMatrix()
+    # glTranslatef(0., 0., -5.)
+    # glMaterialfv(GL_FRONT, GL_DIFFUSE, [0., 0., 1.])
+    # glScalef(0.5, 0.5, 0.5)
+    # gluCylinder(arrow_z_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
+    # glTranslatef(0., 0., 0.3)
+    # glutSolidCone(0.2, 0.5, 32, 32)
+    # glPopMatrix()
 
     glPopMatrix()
 
@@ -368,11 +401,7 @@ def display():
     glRotatef(90., 1., 0., 0.)
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, tex_sun)
-    # glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.1, 0.1, 0.1, 1.0))
-    # glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, (1, 1, 1, 1))
-    # glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, (0.2, 0.2, 0.2, 1))
-    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, sun_light)
-    # glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 10)
+    glMaterialfv(GL_FRONT, GL_AMBIENT, sun_light)
     gluSphere(sun, 3, 32, 32)
     glDisable(GL_TEXTURE_2D)
     glPopMatrix()
@@ -391,11 +420,11 @@ def display():
     glRotatef(primary_rot_angle, 0.0, 0., 1.0)
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, tex_primary_planet)
-    # glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.1, 0.1, 0.1, 1.0))
-    # glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, (1, 1, 1, 1))
-    # glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, (0.2, 0.2, 0.2, 1))
-    # glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, (0, 0, 0, 1))
-    # glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 10)
+    # glMaterialfv(GL_FRONT, GL_AMBIENT, (0.1, 0.1, 0.1, 1.0))
+    # glMaterialfv(GL_FRONT, GL_DIFFUSE, (1, 1, 1, 1))
+    # glMaterialfv(GL_FRONT, GL_SPECULAR, (0.2, 0.2, 0.2, 1))
+    # glMaterialfv(GL_FRONT, GL_EMISSION, (0, 0, 0, 1))
+    # glMaterialf(GL_FRONT, GL_SHININESS, 10)
     gluSphere(primary, 3, 32, 32)
     glDisable(GL_TEXTURE_2D)
 
@@ -432,13 +461,11 @@ def display():
     glRotatef(secondary_rot_angle, 0.0, 0., 1.0)
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, tex_secondary_planet)
-
-    # glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.1, 0.1, 0.1, 1.0))
-    # glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, (1, 1, 1, 1))
-    # glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, (0.2, 0.2, 0.2, 1))
-    # glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, (0, 0, 0, 1))
-    # glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 10)
-
+    # glMaterialfv(GL_FRONT, GL_AMBIENT, (0.1, 0.1, 0.1, 1.0))
+    # glMaterialfv(GL_FRONT, GL_DIFFUSE, (1, 1, 1, 1))
+    # glMaterialfv(GL_FRONT, GL_SPECULAR, (0.2, 0.2, 0.2, 1))
+    # glMaterialfv(GL_FRONT, GL_EMISSION, (0, 0, 0, 1))
+    # glMaterialf(GL_FRONT, GL_SHININESS, 10)
     gluSphere(secondary, 1, 32, 32)
     glDisable(GL_TEXTURE_2D)
 
@@ -456,49 +483,36 @@ def keyboard(key, x, y):
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
     global show_axis, block_rotation
+    global sun_pos
     if key == b'\x1b':
         print("key ESC: exit")
         sys.exit()
     if key == b'w':
-        print("key w: forwards")
-        dx, dy, dz = sphe2cart(1., eye_phi, eye_theta)
-        eye_x += dy
-        eye_y += dz
-        eye_z += dx
-        print_eye_info()
+        move_forward()
         return
     if key == b's':
-        print("key s: backwards")
-        dx, dy, dz, = sphe2cart(1., eye_phi, eye_theta)
-        eye_x -= dy
-        eye_y -= dz
-        eye_z -= dx
-        print_eye_info()
+        move_backwards()
         return
     if key == b'a':
-        print("key a: left")
-        dx, dy, dz, = sphe2cart(1., eye_phi+90, eye_theta)
-        eye_x += dy
-        eye_y += dz
-        eye_z += dx
-        print_eye_info()
+        move_left()
         return
     if key == b'd':
-        print("key d: right")
-        dx, dy, dz, = sphe2cart(1., eye_phi+90, eye_theta)
-        eye_x -= dy
-        eye_y -= dz
-        eye_z -= dx
-        print_eye_info()
+        move_right()
         return
     if key == b'0':
-        print("key 0: initial view")
         eye_x = 0.
         eye_y = 0.
         eye_z = 0.
         eye_rho = 10.
         eye_phi = 180.
         eye_theta = 90.
+        return
+    if key == b'9':
+        print("key 9: sun view")
+        sun_rho, sun_phi, sun_theta = cart2sphe(sun_pos[0], sun_pos[1], sun_pos[2])
+        eye_rho = 10.
+        eye_phi = -sun_theta
+        eye_theta = sun_phi-90
         return
     if key == b'x':
         print("key x: toggle 3D axis")
@@ -557,66 +571,3 @@ glutSpecialFunc(special_keyboard)
 glutIdleFunc(display)
 
 glutMainLoop()
-
-#########################################
-
-
-def draw_axis_2d():
-    axis_len = 0.05
-    x_color = [1, 0, 0]
-    y_color = [0, 1, 0]
-    z_color = [0, 0, 1]
-
-    glPushMatrix()
-
-    glTranslatef(.7, -.5, .0)
-
-    # X
-    glColor3f(*x_color)
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, x_color)
-    glBegin(GL_LINES)
-    glVertex3f(-axis_len, 0, -1)
-    glVertex3f(axis_len, 0, -1)
-    glEnd()
-    glBegin(GL_LINES)
-    glVertex3f(axis_len, 0, -1)
-    glVertex3f(axis_len * 9. / 10, axis_len * 1. / 10, -1)
-    glEnd()
-    glBegin(GL_LINES)
-    glVertex3f(axis_len, 0, -1)
-    glVertex3f(axis_len * 9. / 10, -axis_len * 1. / 10, -1)
-    glEnd()
-
-    # Y
-    glColor3f(*y_color)
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, y_color)
-    glBegin(GL_LINES)
-    glVertex3f(0, -axis_len, -1)
-    glVertex3f(0, axis_len, -1)
-    glEnd()
-    glBegin(GL_LINES)
-    glVertex3f(0, axis_len, -1)
-    glVertex3f(axis_len * 1. / 10, axis_len * 9. / 10, -1)
-    glEnd()
-    glBegin(GL_LINES)
-    glVertex3f(0, axis_len, -1)
-    glVertex3f(-axis_len * 1. / 10, axis_len * 9. / 10, -1)
-    glEnd()
-
-    # Z
-    glColor3f(*z_color)
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, z_color)
-    glBegin(GL_LINES)
-    glVertex3f(0, 0, -axis_len)
-    glVertex3f(0, 0, axis_len)
-    glEnd()
-    glBegin(GL_LINES)
-    glVertex3f(0, 0, axis_len)
-    glVertex3f(axis_len * 1. / 10, 0, axis_len * 9. / 10)
-    glEnd()
-    glBegin(GL_LINES)
-    glVertex3f(0, 0, axis_len)
-    glVertex3f(-axis_len * 1. / 10, 0, axis_len * 9. / 10)
-    glEnd()
-
-    glPopMatrix()
