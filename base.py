@@ -14,14 +14,13 @@ height = 480
 
 primary = None
 primary_rot_angle = 0
+primary_rot_period_ms = 4000
 
 secondary = None
 secondary_rot_angle = 0
 secondary_rev_angle = 90
-
-sun = None
-sun_pos = [-50.0, 0.0, +50.0]
-sun_light = [1., 1., 1.]
+secondary_rot_period_ms = 4000
+secondary_rev_period_ms = 8000
 
 sky_dome = None
 
@@ -119,7 +118,10 @@ def get_look_at_args():
     target_x = eye_x + y
     target_y = eye_y + z
     target_z = eye_z + x
-    # up_x, up_y, up_z = sphe2cart(1,eye_phi,eye_theta-90)
+    # cosi sembra giusto
+    up_z, up_x, up_y = sphe2cart(1, 0, eye_theta-90)
+
+    # print(up_x,up_y,up_z)
     up_x = 0.
     up_y = 1.
     up_z = 0.
@@ -187,13 +189,27 @@ def init():
 
     glEnable(GL_LIGHTING)
     glEnable(GL_LIGHT0)            # Enable light #1
-    glEnable(GL_LIGHT1)            # Enable light #1
-    glEnable(GL_LIGHT2)            # Enable light #2
+    # glEnable(GL_LIGHT1)            # Enable light #1
+    # glEnable(GL_LIGHT2)            # Enable light #2
 
-    glLightfv(GL_LIGHT0, GL_POSITION, sun_pos)
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 0.2])
+    glLightfv(GL_LIGHT0, GL_POSITION, [-50.0, 0.0, +50.0])
+
+    # reference for glLightModelfv parameters
+    # https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glLightModel.xml
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 1])
+    # GL_LIGHT_MODEL_AMBIENT
+    # params contains four integer or floating-point values that specify the ambient RGBA intensity
+    # of the entire scene.
+    # Integer values are mapped linearly such that the most positive representable value maps to 1.0,
+    # and the most negative representable value maps to -1.0 . Floating-point values are mapped directly.
+    # Neither integer nor floating-point values are clamped.
+    # The initial ambient scene intensity is (0.2, 0.2, 0.2, 1.0).
+    # ....
 
     print_light_info(GL_LIGHT0)
+    # print_light_info(GL_LIGHT1)
+    # print_light_info(GL_LIGHT2)
+    # print_light_info(GL_LIGHT3)
 
     glEnable(GL_NORMALIZE)
 
@@ -249,45 +265,44 @@ def draw_axis_3d():
     global arrow_x_q, arrow_y_q, arrow_z_q
 
     glPushMatrix()
-    glTranslatef(eye_x, eye_y, eye_z)
-    glTranslatef(2.5, -2, 0)
-
-    glDisable(GL_LIGHTING)
-    # three arrows are colored using glColor
-    # to do this light mus be disabled
-    # in this way arrows have theirs own color
-    # and doesn't have any effects on the rest of the scene
-
-    glPushMatrix()
-    glTranslatef(0., 0., -5.)
-    glRotatef(90, 0., 1., 0.)
-    glColor3f(1., 0., 0.)
-    glScalef(0.5, 0.5, 0.5)
-    gluCylinder(arrow_x_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
-    glTranslatef(0., 0., 0.3)
-    glutSolidCone(0.2, 0.5, 32, 32)
-    glPopMatrix()
-
-    glPushMatrix()
-    glTranslatef(0., 0., -5.)
-    glRotatef(-90, 1., 0., 0.)
-    glColor3f(0., 1., 0.)
-    glScalef(0.5, 0.5, 0.5)
-    gluCylinder(arrow_y_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
-    glTranslatef(0., 0., 0.3)
-    glutSolidCone(0.2, 0.5, 32, 32)
-    glPopMatrix()
-
-    glPushMatrix()
-    glTranslatef(0., 0., -5.)
-    glColor3f(0., 0., 1.)
-    glScalef(0.5, 0.5, 0.5)
-    gluCylinder(arrow_z_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
-    glTranslatef(0., 0., 0.3)
-    glutSolidCone(0.2, 0.5, 32, 32)
-    glPopMatrix()
-
-    glEnable(GL_LIGHTING)
+    # glTranslatef(eye_x, eye_y, eye_z)
+    # glRotatef(eye_phi-180, 0., 1., 0.)
+    # glRotatef(eye_theta-90, -1., 0., 0.)
+    # glTranslatef(3.3, -2.5, 0)
+    #
+    # glDisable(GL_LIGHTING)
+    # # three arrows are colored using glColor
+    # # to do this light mus be disabled
+    # # in this way arrows have theirs own color
+    # # and doesn't have any effects on the rest of the scene
+    #
+    # glPushMatrix()
+    # glTranslatef(0., 0., -5.)
+    # glRotatef(90, 0., 1., 0.)
+    # glColor3f(1., 0., 0.)
+    # gluCylinder(arrow_x_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
+    # glTranslatef(0., 0., 0.3)
+    # glutSolidCone(0.2, 0.5, 32, 32)
+    # glPopMatrix()
+    #
+    # glPushMatrix()
+    # glTranslatef(0., 0., -5.)
+    # glRotatef(-90, 1., 0., 0.)
+    # glColor3f(0., 1., 0.)
+    # gluCylinder(arrow_y_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
+    # glTranslatef(0., 0., 0.3)
+    # glutSolidCone(0.2, 0.5, 32, 32)
+    # glPopMatrix()
+    #
+    # glPushMatrix()
+    # glTranslatef(0., 0., -5.)
+    # glColor3f(0., 0., 1.)
+    # gluCylinder(arrow_z_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
+    # glTranslatef(0., 0., 0.3)
+    # glutSolidCone(0.2, 0.5, 32, 32)
+    # glPopMatrix()
+    #
+    # glEnable(GL_LIGHTING)
 
     glPopMatrix()
 
@@ -478,17 +493,19 @@ def display():
     glTranslatef(0.0, 0.0, -6.)
     glRotatef(90., 1., 0., 0.)
     glRotatef(secondary_rot_angle, 0.0, 0., 1.0)
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.1, 0.1, 0.1, 1.0))
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, (1, 1, 1, 1))
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, (0.2, 0.2, 0.2, 1))
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, (0, 0, 0, 1))
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 10)
+
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, tex_secondary_planet)
     gluSphere(secondary, 1, 32, 32)
     glDisable(GL_TEXTURE_2D)
 
     glPopMatrix()
-
-    if not block_rotation:
-        primary_rot_angle += 1
-        secondary_rot_angle += 2
-        secondary_rev_angle += 1
 
     glFlush()
 
@@ -497,7 +514,7 @@ def keyboard(key, x, y):
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
     global show_axis, block_rotation
-    global sun_pos
+
     if key == b'\x1b':
         print("key ESC: exit")
         sys.exit()
@@ -526,13 +543,13 @@ def keyboard(key, x, y):
         eye_theta = 90.
         glutPostRedisplay()
         return
-    if key == b'9':
-        sun_rho, sun_phi, sun_theta = cart2sphe(sun_pos[0], sun_pos[1], sun_pos[2])
-        eye_rho = 10.
-        eye_phi = -sun_theta
-        eye_theta = sun_phi-90
-        glutPostRedisplay()
-        return
+    # if key == b'9':
+    #     sun_rho, sun_phi, sun_theta = cart2sphe(sun_pos[0], sun_pos[1], sun_pos[2])
+    #     eye_rho = 10.
+    #     eye_phi = -sun_theta
+    #     eye_theta = sun_phi-90
+    #     glutPostRedisplay()
+    #     return
     if key == b'x':
         show_axis = not show_axis
         glutPostRedisplay()
@@ -547,6 +564,9 @@ def special_keyboard(key, x, y):
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
 
+    # print(eye_rho, eye_phi, eye_theta)
+    # print(*get_look_at_args())
+    #
     if key == GLUT_KEY_LEFT:
         eye_phi += 1
         glutPostRedisplay()
@@ -556,13 +576,13 @@ def special_keyboard(key, x, y):
         glutPostRedisplay()
         return
     if key == GLUT_KEY_DOWN:
-        if eye_theta == 135:
+        if eye_theta > 90+45:
             return
         eye_theta += 1
         glutPostRedisplay()
         return
     if key == GLUT_KEY_UP:
-        if eye_theta == 45:
+        if eye_theta < 90-45:
             return
         eye_theta -= 1
         glutPostRedisplay()
@@ -574,6 +594,21 @@ def reshape(w, h):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective(60, w / float(h), 1.0, 402.0)
+
+
+def update_scene(val):
+    global primary_rot_angle, primary_rot_period_ms
+    global secondary_rot_angle, secondary_rev_angle, secondary_rot_period_ms, secondary_rev_period_ms
+    global block_rotation
+
+    if not block_rotation:
+        primary_rot_angle += float(val)*360/primary_rot_period_ms
+        secondary_rot_angle += float(val)*360/secondary_rot_period_ms
+        secondary_rev_angle += float(val)*360/secondary_rev_period_ms
+
+    glutTimerFunc(val, update_scene, val)
+    glutPostRedisplay()
+    return
 
 
 glutInit()
@@ -588,6 +623,8 @@ glutDisplayFunc(display)
 glutReshapeFunc(reshape)
 glutKeyboardFunc(keyboard)
 glutSpecialFunc(special_keyboard)
-glutIdleFunc(display)
+# glutIdleFunc(display)
+
+glutTimerFunc(10, update_scene, 10)
 
 glutMainLoop()
