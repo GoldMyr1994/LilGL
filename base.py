@@ -4,9 +4,9 @@ from OpenGL.GLU import *
 from PIL import Image
 from math import sin, cos, degrees, radians, sqrt, pow, atan2
 
-print(GL_VERSION)
-print(GL_MINOR_VERSION)
-print(GL_MAJOR_VERSION)
+# print(GL_VERSION)
+# print(GL_MINOR_VERSION)
+# print(GL_MAJOR_VERSION)
 
 width = 640
 height = 480
@@ -200,7 +200,7 @@ def init():
     # The initial ambient scene intensity is (0.2, 0.2, 0.2, 1.0).
     # ....
 
-    print_light_info(GL_LIGHT0)
+    # print_light_info(GL_LIGHT0)
 
     glEnable(GL_NORMALIZE)
 
@@ -379,7 +379,7 @@ def keyboard(key, x, y):
     global eye_rho, eye_phi, eye_theta
 
     if key == b'\x1b':
-        print("key ESC: exit")
+        # print("key ESC: exit")
         sys.exit()
     if key == b'w':
         move_forward()
