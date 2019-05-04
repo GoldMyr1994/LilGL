@@ -3,7 +3,6 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from PIL import Image
 from math import sin, cos, degrees, radians, sqrt, pow, atan2
-import math
 
 print(GL_VERSION)
 print(GL_MINOR_VERSION)
@@ -13,6 +12,7 @@ width = 640
 height = 480
 
 primary = None
+primary_radius = 1.5
 primary_rot_angle = 0
 primary_rot_period_ms = 4000
 
@@ -29,8 +29,7 @@ tex_secondary_planet = None
 tex_background = None
 tex_tree = None
 tex_rose = None
-tex_lp = None
-tex_sun = None
+tex_little_prince = None
 
 tex_primary_planet_path = "./img/mars.jpg"
 tex_secondary_planet_path = "./img/mercury.jpg"
@@ -38,17 +37,7 @@ tex_background_path = "./img/space.jpg"
 tex_tree_path = "./img/tree.png"
 tex_baobab_path = "./img/baobab.png"
 tex_rose_path = "./img/rose.png"
-tex_lp_path = "./img/lp.png"
-tex_sun_path = "./img/sun.jpg"
-
-block_rotation = True
-show_axis = True
-
-
-arrow_x_q = {"cyl": None, "con": None}
-arrow_y_q = {"cyl": None, "con": None}
-arrow_z_q = {"cyl": None, "con": None}
-
+tex_little_prince_path = "./img/little_prince.png"
 
 eye_x = 0.
 eye_y = 0.
@@ -60,24 +49,29 @@ eye_theta = 90.
 
 
 def cart2sphe(x, y, z):
+
     rho_xy = sqrt(pow(x, 2)+pow(y, 2))
     rho = sqrt(pow(rho_xy, 2)+pow(z, 2))
     theta = atan2(z, rho_xy)
-    print(x,y)
     phi = atan2(y, x)
+
     return rho, degrees(phi), degrees(theta)
 
 
 def sphe2cart(rho, phi, theta):
+
     x = rho*sin(radians(theta))*cos(radians(phi))
     y = rho*sin(radians(theta))*sin(radians(phi))
     z = rho*cos(radians(theta))
+
     return x, y, z
 
 
 def move_forward():
+
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
+
     dx, dy, dz = sphe2cart(1., eye_phi, eye_theta)
     eye_x += dy
     eye_y += dz
@@ -94,8 +88,10 @@ def move_backwards():
 
 
 def move_left():
+
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
+
     dx, dy, dz, = sphe2cart(1., eye_phi+90, eye_theta)
     eye_x += dy
     eye_y += dz
@@ -114,14 +110,15 @@ def move_right():
 def get_look_at_args():
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
+
     x, y, z = sphe2cart(eye_rho, eye_phi, eye_theta)
+
     target_x = eye_x + y
     target_y = eye_y + z
     target_z = eye_z + x
-    # cosi sembra giusto
-    up_z, up_x, up_y = sphe2cart(1, 0, eye_theta-90)
 
-    # print(up_x,up_y,up_z)
+    # up_z, up_x, up_y = sphe2cart(1, 0, eye_theta-90)
+
     up_x = 0.
     up_y = 1.
     up_z = 0.
@@ -178,9 +175,8 @@ def print_light_info(light_name):
 
 def init():
 
-    global primary, secondary, sun
-    global tex_primary_planet, tex_secondary_planet, tex_tree, tex_background, tex_rose, tex_lp, tex_sun
-    global arrow_x_q, arrow_y_q, arrow_z_q
+    global primary, secondary
+    global tex_primary_planet, tex_secondary_planet, tex_tree, tex_background, tex_rose, tex_little_prince
     global sky_dome
 
     glClearColor(0.0, 0.0, 0.0, 1.0)
@@ -189,8 +185,6 @@ def init():
 
     glEnable(GL_LIGHTING)
     glEnable(GL_LIGHT0)            # Enable light #1
-    # glEnable(GL_LIGHT1)            # Enable light #1
-    # glEnable(GL_LIGHT2)            # Enable light #2
 
     glLightfv(GL_LIGHT0, GL_POSITION, [-50.0, 0.0, +50.0])
 
@@ -207,9 +201,6 @@ def init():
     # ....
 
     print_light_info(GL_LIGHT0)
-    # print_light_info(GL_LIGHT1)
-    # print_light_info(GL_LIGHT2)
-    # print_light_info(GL_LIGHT3)
 
     glEnable(GL_NORMALIZE)
 
@@ -218,8 +209,7 @@ def init():
     tex_tree = load_texture_x(tex_baobab_path)
     tex_background = load_texture(tex_background_path)
     tex_rose = load_texture_x(tex_rose_path)
-    tex_lp = load_texture_x(tex_lp_path)
-    tex_sun = load_texture(tex_sun_path)
+    tex_little_prince = load_texture_x(tex_little_prince_path)
 
     primary = gluNewQuadric()
     gluQuadricNormals(primary, GLU_SMOOTH)
@@ -233,24 +223,6 @@ def init():
     gluQuadricDrawStyle(secondary, GLU_FILL)
     gluQuadricOrientation(secondary, GLU_OUTSIDE)
 
-    sun = gluNewQuadric()
-    gluQuadricNormals(sun, GLU_SMOOTH)
-    gluQuadricTexture(sun, GL_TRUE)
-    gluQuadricDrawStyle(sun, GLU_FILL)
-    gluQuadricOrientation(sun, GLU_OUTSIDE)
-
-    arrow_x_q["cyl"] = gluNewQuadric()
-    gluQuadricNormals(arrow_x_q["cyl"], GLU_SMOOTH)
-    gluQuadricTexture(arrow_x_q["cyl"], GL_TRUE)
-
-    arrow_y_q["cyl"] = gluNewQuadric()
-    gluQuadricNormals(arrow_y_q["cyl"], GLU_SMOOTH)
-    gluQuadricTexture(arrow_y_q["cyl"], GL_TRUE)
-
-    arrow_z_q["cyl"] = gluNewQuadric()
-    gluQuadricNormals(arrow_z_q["cyl"], GLU_SMOOTH)
-    gluQuadricTexture(arrow_z_q["cyl"], GL_TRUE)
-
     sky_dome = gluNewQuadric()
     gluQuadricNormals(sky_dome, GLU_SMOOTH)
     gluQuadricTexture(sky_dome, GL_TRUE)
@@ -260,65 +232,20 @@ def init():
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
 
 
-def draw_axis_3d():
-
-    global arrow_x_q, arrow_y_q, arrow_z_q
+def texture_on_plane(tex_id, sx, sy, sz, alpha):
 
     glPushMatrix()
-    # glTranslatef(eye_x, eye_y, eye_z)
-    # glRotatef(eye_phi-180, 0., 1., 0.)
-    # glRotatef(eye_theta-90, -1., 0., 0.)
-    # glTranslatef(3.3, -2.5, 0)
-    #
-    # glDisable(GL_LIGHTING)
-    # # three arrows are colored using glColor
-    # # to do this light mus be disabled
-    # # in this way arrows have theirs own color
-    # # and doesn't have any effects on the rest of the scene
-    #
-    # glPushMatrix()
-    # glTranslatef(0., 0., -5.)
-    # glRotatef(90, 0., 1., 0.)
-    # glColor3f(1., 0., 0.)
-    # gluCylinder(arrow_x_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
-    # glTranslatef(0., 0., 0.3)
-    # glutSolidCone(0.2, 0.5, 32, 32)
-    # glPopMatrix()
-    #
-    # glPushMatrix()
-    # glTranslatef(0., 0., -5.)
-    # glRotatef(-90, 1., 0., 0.)
-    # glColor3f(0., 1., 0.)
-    # gluCylinder(arrow_y_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
-    # glTranslatef(0., 0., 0.3)
-    # glutSolidCone(0.2, 0.5, 32, 32)
-    # glPopMatrix()
-    #
-    # glPushMatrix()
-    # glTranslatef(0., 0., -5.)
-    # glColor3f(0., 0., 1.)
-    # gluCylinder(arrow_z_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
-    # glTranslatef(0., 0., 0.3)
-    # glutSolidCone(0.2, 0.5, 32, 32)
-    # glPopMatrix()
-    #
-    # glEnable(GL_LIGHTING)
 
-    glPopMatrix()
+    glScale(sx, sy, sz)
 
-
-def draw_tree():
-
-    glPushMatrix()
-    glScale(1.5, 1.5, 1.5)
-
-    glEnable(GL_BLEND)
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-    glEnable(GL_ALPHA_TEST)
-    glAlphaFunc(GL_GREATER, 0.0)
+    if alpha:
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glEnable(GL_ALPHA_TEST)
+        glAlphaFunc(GL_GREATER, 0.0)
 
     glEnable(GL_TEXTURE_2D)
-    glBindTexture(GL_TEXTURE_2D, tex_tree)
+    glBindTexture(GL_TEXTURE_2D, tex_id)
     glBegin(GL_QUADS)
     glTexCoord2f(0., 0.)
     glVertex3f(-0.5, 0., 0.)
@@ -329,22 +256,23 @@ def draw_tree():
     glTexCoord2f(1., 0.)
     glVertex3f(+0.5, 0., 0.)
     glEnd()
-    glDisable(GL_TEXTURE_2D)
 
-    glDisable(GL_ALPHA_TEST)
-    glDisable(GL_BLEND)
+    if alpha:
+        glDisable(GL_ALPHA_TEST)
+        glDisable(GL_BLEND)
 
     glPopMatrix()
 
 
-def draw_two_plate_tree():
+def draw_tree():
+
     glPushMatrix()
     glRotatef(100, 0., 1., 0.)
     glRotatef(60, 1., 0., 0.)
-    glTranslatef(0., 0., -2.9)
-    draw_tree()
+    glTranslatef(0., 0., -primary_radius*9/10)
+    texture_on_plane(tex_tree, 3., 3., 3., True)
     glRotatef(90, 0., 0., 1.)
-    draw_tree()
+    texture_on_plane(tex_tree, 3., 3., 3., True)
     glPopMatrix()
 
 
@@ -353,35 +281,8 @@ def draw_rose():
     glPushMatrix()
     glRotatef(-100, 0., 1., 0.)
     glRotatef(-60, 1., 0., 0.)
-    glTranslatef(0., 0., -2.9)
-
-    glPushMatrix()
-    glScale(0.75, 0.75, 0.75)
-
-    glEnable(GL_BLEND)
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-    glEnable(GL_ALPHA_TEST)
-    glAlphaFunc(GL_GREATER, 0.0)
-
-    glEnable(GL_TEXTURE_2D)
-    glBindTexture(GL_TEXTURE_2D, tex_rose)
-    glBegin(GL_QUADS)
-    glTexCoord2f(0., 0.)
-    glVertex3f(-0.5, 0., 0.)
-    glTexCoord2f(0., 1.)
-    glVertex3f(-0.5, 0., -1.)
-    glTexCoord2f(1., 1.)
-    glVertex3f(+0.5, 0., -1.)
-    glTexCoord2f(1., 0.)
-    glVertex3f(+0.5, 0., 0.)
-    glEnd()
-    glDisable(GL_TEXTURE_2D)
-
-    glDisable(GL_ALPHA_TEST)
-    glDisable(GL_BLEND)
-
-    glPopMatrix()
-
+    glTranslatef(0., 0., -primary_radius*9/10)
+    texture_on_plane(tex_rose, 0.75, 0.75, 0.75, True)
     glPopMatrix()
 
 
@@ -390,40 +291,16 @@ def draw_little_prince_and_fox():
     glPushMatrix()
     glRotatef(-70, 0., 1., 0.)
     glRotatef(-30, 1., 0., 0.)
-    glTranslatef(0., 0., -2.9)
+    glTranslatef(0., 0., -primary_radius*9/10)
 
-    glPushMatrix()
-    glScale(0.75, 0.75, 0.75)
-
-    glEnable(GL_BLEND)
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-    glEnable(GL_ALPHA_TEST)
-    glAlphaFunc(GL_GREATER, 0.0)
-
-    glEnable(GL_TEXTURE_2D)
-    glBindTexture(GL_TEXTURE_2D, tex_lp)
-    glBegin(GL_QUADS)
-    glTexCoord2f(0., 0.)
-    glVertex3f(-0.5, 0., 0.)
-    glTexCoord2f(0., 1.)
-    glVertex3f(-0.5, 0., -1.)
-    glTexCoord2f(1., 1.)
-    glVertex3f(+0.5, 0., -1.)
-    glTexCoord2f(1., 0.)
-    glVertex3f(+0.5, 0., 0.)
-    glEnd()
-    glDisable(GL_TEXTURE_2D)
-
-    glDisable(GL_ALPHA_TEST)
-    glDisable(GL_BLEND)
-
-    glPopMatrix()
+    texture_on_plane(tex_little_prince, 0.75, 0.75, 0.75, True)
 
     glPopMatrix()
 
 
 def draw_background():
     global sky_dome, tex_background
+
     glPushMatrix()
 
     glRotatef(90., 1., 0., 0.)
@@ -448,23 +325,17 @@ def display():
         *get_look_at_args()
     )
 
-    if show_axis:
-        draw_axis_3d()
-
     draw_background()
 
-    # glPushMatrix()
-    # glTranslatef(*sun_pos)
-    # glRotatef(90., 1., 0., 0.)
-    # glEnable(GL_TEXTURE_2D)
-    # glBindTexture(GL_TEXTURE_2D, tex_sun)
-    # gluSphere(sun, 3, 32, 32)
-    # glDisable(GL_TEXTURE_2D)
-    # glPopMatrix()
+    glPushMatrix()
+    glTranslatef(0., 50, -50.)
+    glColor3f(1, 0, 0)
+
+    glPopMatrix()
 
     glPushMatrix()
 
-    glTranslatef(0.0, 0.0, -10.)
+    glTranslatef(0.0, 0.0, -12.)
 
     glPushMatrix()
 
@@ -476,10 +347,10 @@ def display():
     glRotatef(primary_rot_angle, 0.0, 0., 1.0)
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, tex_primary_planet)
-    gluSphere(primary, 3, 32, 32)
+    gluSphere(primary, primary_radius, 32, 32)
     glDisable(GL_TEXTURE_2D)
 
-    draw_two_plate_tree()
+    draw_tree()
 
     draw_rose()
 
@@ -493,16 +364,9 @@ def display():
     glTranslatef(0.0, 0.0, -6.)
     glRotatef(90., 1., 0., 0.)
     glRotatef(secondary_rot_angle, 0.0, 0., 1.0)
-
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (0.1, 0.1, 0.1, 1.0))
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, (1, 1, 1, 1))
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, (0.2, 0.2, 0.2, 1))
-    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, (0, 0, 0, 1))
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 10)
-
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, tex_secondary_planet)
-    gluSphere(secondary, 1, 32, 32)
+    gluSphere(secondary, 0.5, 32, 32)
     glDisable(GL_TEXTURE_2D)
 
     glPopMatrix()
@@ -513,7 +377,6 @@ def display():
 def keyboard(key, x, y):
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
-    global show_axis, block_rotation
 
     if key == b'\x1b':
         print("key ESC: exit")
@@ -543,30 +406,12 @@ def keyboard(key, x, y):
         eye_theta = 90.
         glutPostRedisplay()
         return
-    # if key == b'9':
-    #     sun_rho, sun_phi, sun_theta = cart2sphe(sun_pos[0], sun_pos[1], sun_pos[2])
-    #     eye_rho = 10.
-    #     eye_phi = -sun_theta
-    #     eye_theta = sun_phi-90
-    #     glutPostRedisplay()
-    #     return
-    if key == b'x':
-        show_axis = not show_axis
-        glutPostRedisplay()
-        return
-    if key == b'b':
-        block_rotation = not block_rotation
-        glutPostRedisplay()
-        return
 
 
 def special_keyboard(key, x, y):
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
 
-    # print(eye_rho, eye_phi, eye_theta)
-    # print(*get_look_at_args())
-    #
     if key == GLUT_KEY_LEFT:
         eye_phi += 1
         glutPostRedisplay()
@@ -599,12 +444,10 @@ def reshape(w, h):
 def update_scene(val):
     global primary_rot_angle, primary_rot_period_ms
     global secondary_rot_angle, secondary_rev_angle, secondary_rot_period_ms, secondary_rev_period_ms
-    global block_rotation
 
-    if not block_rotation:
-        primary_rot_angle += float(val)*360/primary_rot_period_ms
-        secondary_rot_angle += float(val)*360/secondary_rot_period_ms
-        secondary_rev_angle += float(val)*360/secondary_rev_period_ms
+    primary_rot_angle += float(val)*360/primary_rot_period_ms
+    secondary_rot_angle += float(val)*360/secondary_rot_period_ms
+    secondary_rev_angle += float(val)*360/secondary_rev_period_ms
 
     glutTimerFunc(val, update_scene, val)
     glutPostRedisplay()
@@ -628,3 +471,67 @@ glutSpecialFunc(special_keyboard)
 glutTimerFunc(10, update_scene, 10)
 
 glutMainLoop()
+
+#########################################################################
+
+# arrow_x_q = {"cyl": None, "con": None}
+# arrow_y_q = {"cyl": None, "con": None}
+# arrow_z_q = {"cyl": None, "con": None}
+
+# arrow_x_q["cyl"] = gluNewQuadric()
+# gluQuadricNormals(arrow_x_q["cyl"], GLU_SMOOTH)
+# gluQuadricTexture(arrow_x_q["cyl"], GL_TRUE)
+#
+# arrow_y_q["cyl"] = gluNewQuadric()
+# gluQuadricNormals(arrow_y_q["cyl"], GLU_SMOOTH)
+# gluQuadricTexture(arrow_y_q["cyl"], GL_TRUE)
+#
+# arrow_z_q["cyl"] = gluNewQuadric()
+# gluQuadricNormals(arrow_z_q["cyl"], GLU_SMOOTH)
+# gluQuadricTexture(arrow_z_q["cyl"], GL_TRUE)
+
+# def draw_axis_3d():
+#
+#     global arrow_x_q, arrow_y_q, arrow_z_q
+#
+#     glPushMatrix()
+#     # glTranslatef(eye_x, eye_y, eye_z)
+#     # glRotatef(eye_phi-180, 0., 1., 0.)
+#     # glRotatef(eye_theta-90, -1., 0., 0.)
+#     # glTranslatef(3.3, -2.5, 0)
+#     #
+#     # glDisable(GL_LIGHTING)
+#     # # three arrows are colored using glColor
+#     # # to do this light mus be disabled
+#     # # in this way arrows have theirs own color
+#     # # and doesn't have any effects on the rest of the scene
+#     #
+#     # glPushMatrix()
+#     # glTranslatef(0., 0., -5.)
+#     # glRotatef(90, 0., 1., 0.)
+#     # glColor3f(1., 0., 0.)
+#     # gluCylinder(arrow_x_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
+#     # glTranslatef(0., 0., 0.3)
+#     # glutSolidCone(0.2, 0.5, 32, 32)
+#     # glPopMatrix()
+#     #
+#     # glPushMatrix()
+#     # glTranslatef(0., 0., -5.)
+#     # glRotatef(-90, 1., 0., 0.)
+#     # glColor3f(0., 1., 0.)
+#     # gluCylinder(arrow_y_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
+#     # glTranslatef(0., 0., 0.3)
+#     # glutSolidCone(0.2, 0.5, 32, 32)
+#     # glPopMatrix()
+#     #
+#     # glPushMatrix()
+#     # glTranslatef(0., 0., -5.)
+#     # glColor3f(0., 0., 1.)
+#     # gluCylinder(arrow_z_q["cyl"], 0.1, 0.1, 0.3, 32, 32)
+#     # glTranslatef(0., 0., 0.3)
+#     # glutSolidCone(0.2, 0.5, 32, 32)
+#     # glPopMatrix()
+#     #
+#     # glEnable(GL_LIGHTING)
+#
+#     glPopMatrix()
