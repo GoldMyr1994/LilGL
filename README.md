@@ -9,9 +9,15 @@ OpenGL Littel Prince Universe implementation
 - pyopengl 3.1
 - pillow 5.3
 
+
 ### Install environment with conda
 ```
 conda env create -f environment.yml
+```
+
+### Start Environment
+```
+conda activate LILGL
 ```
 
 ### Run
