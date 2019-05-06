@@ -198,8 +198,11 @@ def init():
 
     glEnable(GL_LIGHTING)
     glEnable(GL_LIGHT0)            # Enable light #1
+    # glEnable(GL_LIGHT1)            # Enable light #1
 
-    glLightfv(GL_LIGHT0, GL_POSITION, [-50.0, 0.0, +50.0])
+    # glLightfv(GL_LIGHT0, GL_POSITION, [-50.0, 0.0, +50.0])
+    # glLightfv(GL_LIGHT1, GL_POSITION, [-50.0, 0.0, +50.0])
+    # glLightfv(GL_LIGHT1, GL_AMBIENT, [1., 1., 1., 1.])
 
     # reference for glLightModelfv parameters
     # https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glLightModel.xml
@@ -214,6 +217,7 @@ def init():
     # ....
 
     # print_light_info(GL_LIGHT0)
+    # print_light_info(GL_LIGHT1)
 
     glEnable(GL_NORMALIZE)
 
