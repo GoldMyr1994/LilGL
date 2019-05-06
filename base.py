@@ -3,6 +3,18 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from PIL import Image
 from math import sin, cos, degrees, radians, sqrt, pow, atan2
+from functools import wraps
+
+
+def push_pop(f):
+    @wraps(f)
+    def _wrapper(*args, **kwargs):
+        glPushMatrix()
+        result = f(*args, **kwargs)
+        glPopMatrix()
+        return result
+    return _wrapper
+
 
 # print(GL_VERSION)
 # print(GL_MINOR_VERSION)
@@ -68,7 +80,6 @@ def sphe2cart(rho, phi, theta):
 
 
 def move_forward():
-
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
 
@@ -81,6 +92,7 @@ def move_forward():
 def move_backwards():
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
+
     dx, dy, dz = sphe2cart(1., eye_phi, eye_theta)
     eye_x -= dy
     eye_y -= dz
@@ -88,7 +100,6 @@ def move_backwards():
 
 
 def move_left():
-
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
 
@@ -102,6 +113,7 @@ def move_right():
     global eye_x, eye_y, eye_z
     global eye_rho, eye_phi, eye_theta
     dx, dy, dz, = sphe2cart(1., eye_phi+90, eye_theta)
+
     eye_x -= dy
     eye_y -= dz
     eye_z -= dx
@@ -122,6 +134,7 @@ def get_look_at_args():
     up_x = 0.
     up_y = 1.
     up_z = 0.
+
     return eye_x, eye_y, eye_z, target_x, target_y, target_z, up_x, up_y, up_z
 
 
@@ -232,9 +245,10 @@ def init():
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
 
 
+@push_pop
 def texture_on_plane(tex_id, sx, sy, sz, alpha):
 
-    glPushMatrix()
+    # glPushMatrix()
 
     glScale(sx, sy, sz)
 
@@ -261,55 +275,55 @@ def texture_on_plane(tex_id, sx, sy, sz, alpha):
         glDisable(GL_ALPHA_TEST)
         glDisable(GL_BLEND)
 
-    glPopMatrix()
+    # glPopMatrix()
 
 
+@push_pop
 def draw_tree():
 
-    glPushMatrix()
+    # glPushMatrix()
     glRotatef(100, 0., 1., 0.)
     glRotatef(60, 1., 0., 0.)
     glTranslatef(0., 0., -primary_radius*9/10)
     texture_on_plane(tex_tree, 3., 3., 3., True)
     glRotatef(90, 0., 0., 1.)
     texture_on_plane(tex_tree, 3., 3., 3., True)
-    glPopMatrix()
+    # glPopMatrix()
 
 
+@push_pop
 def draw_rose():
 
-    glPushMatrix()
+    # glPushMatrix()
     glRotatef(-100, 0., 1., 0.)
     glRotatef(-60, 1., 0., 0.)
     glTranslatef(0., 0., -primary_radius*9/10)
     texture_on_plane(tex_rose, 0.75, 0.75, 0.75, True)
-    glPopMatrix()
+    # glPopMatrix()
 
 
+@push_pop
 def draw_little_prince_and_fox():
 
-    glPushMatrix()
+    # glPushMatrix()
     glRotatef(-70, 0., 1., 0.)
     glRotatef(-30, 1., 0., 0.)
     glTranslatef(0., 0., -primary_radius*9/10)
-
     texture_on_plane(tex_little_prince, 0.75, 0.75, 0.75, True)
+    # glPopMatrix()
 
-    glPopMatrix()
 
-
+@push_pop
 def draw_background():
     global sky_dome, tex_background
 
-    glPushMatrix()
-
+    # glPushMatrix()
     glRotatef(90., 1., 0., 0.)
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, tex_background)
     gluSphere(sky_dome, 200, 512, 512)
     glDisable(GL_TEXTURE_2D)
-
-    glPopMatrix()
+    # glPopMatrix()
 
 
 def display():
