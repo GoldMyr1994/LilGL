@@ -5,9 +5,9 @@ OpenGL Littel Prince Universe implementation
 ## Getting Started
 
 ### Requirements
-- Python 3.6.4 
-- NumPy 1.14.0
-- PIL 5.3.0
+- python 3.6.4 
+- pyopengl 3.1
+- PIL 5.3
 
 ### Install environment with conda
 ```
